@@ -11,15 +11,13 @@ import logging
 import time
 import pdb
 import os
+import sys
 import json
 import random
 from tqdm import tqdm
 
 import sys
 sys.path.append("../") 
-
-import wandb
-wandb.init(project="mirrorwic")
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -223,7 +221,6 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
             model.optimizer.step()
 
         train_loss += loss.item()
-        wandb.log({"Loss": loss.item()})
         train_steps += 1
         step_global += 1
         #if (i+1) % 10 == 0:
@@ -318,7 +315,7 @@ def main(args):
             all_attention_mask=torch.tensor([delete_tokenmarker_am(input_ids,tokenizer) for input_ids in all_input_ids], dtype=torch.long)
             query_encodings2 = {"input_ids": all_input_ids, "attention_mask": all_attention_mask,'token_ids':all_token_ids}
         
-                
+        print(tokenizer.convert_ids_to_tokens(query_encodings1["input_ids"]))
 
         query_ids = torch.tensor(list(query_id))
         return  query_encodings1, query_encodings2, query_ids,query_id_org
