@@ -289,7 +289,7 @@ def main(args):
         LOGGER.info("using nn.DataParallel")
     
     def collate_fn_batch_encoding_pairwise(batch):
-        query1, query2, query_id,query_id_org = zip(*batch)
+        query1, query2, query_id, query_id_org = zip(*batch)
         query_encodings1 = tokenizer.batch_encode_plus(
                 list(query1), 
                 max_length=args.max_length, 
@@ -315,10 +315,9 @@ def main(args):
             all_attention_mask=torch.tensor([delete_tokenmarker_am(input_ids,tokenizer) for input_ids in all_input_ids], dtype=torch.long)
             query_encodings2 = {"input_ids": all_input_ids, "attention_mask": all_attention_mask,'token_ids':all_token_ids}
         
-        print(tokenizer.convert_ids_to_tokens(query_encodings1["input_ids"]))
-
         query_ids = torch.tensor(list(query_id))
-        return  query_encodings1, query_encodings2, query_ids,query_id_org
+
+        return  query_encodings1, query_encodings2, query_ids, query_id_org
 
 
     if args.pairwise:
@@ -330,7 +329,7 @@ def main(args):
             train_set,
             batch_size=args.train_batch_size,
             shuffle=True,
-            num_workers=16,
+            num_workers=1,
             collate_fn=collate_fn_batch_encoding_pairwise
         )
    

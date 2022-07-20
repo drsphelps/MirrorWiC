@@ -1,5 +1,5 @@
 from collections import defaultdict
-from random import sample
+from random import sample, random
 import argparse
 import os
 from copy import deepcopy
@@ -22,6 +22,15 @@ def erase_and_mask_on_wic(example,erase_len):
     example=sent_prev+' '+w+' '+sent_after
     return example
 
+def idiom_biased_sample(words, sentnum):
+    mwes_in_words = [w for w in words if w in mwes]
+    print(mwes_in_words)
+    if len(mwes_in_words) > 0:
+        if random() < 0.50:
+            words = mwes_in_words
+    
+    return sample(words, sentnum)
+
 def wic_transform(sent,sentnum,word_tokenize,word_position_max=20):
     sent=sent.replace('[','').replace(']','')
     w2sentsnew=defaultdict(list)
@@ -36,13 +45,11 @@ def wic_transform(sent,sentnum,word_tokenize,word_position_max=20):
                 w2sentsnew[w].append(sentorig)
     if sentnum>len(w2sentsnew):
         sentnum=len(w2sentsnew)
-    wlist=sample(list(w2sentsnew.keys()),sentnum)
+    wlist=idiom_biased_sample(list(w2sentsnew.keys()),sentnum)
     sentsnew=[]
-    for w  in wlist:
+    for w in wlist:
         sentsnew.append(sample(w2sentsnew[w],1)[0])
     return sentsnew
-
-
 
 parser = argparse.ArgumentParser(description='get_mirrorwic_traindata')
 parser.add_argument('--data',type=str,help='data with one sentence per line')
@@ -50,15 +57,15 @@ parser.add_argument('--lg',type=str,help='language')
 parser.add_argument('--random_er',type=int,help='random erasuer length')
 args=parser.parse_args()
 
-print (args.data)
+mwes = ['swan song']
+print(args.data)
 maxlen=150
 sentnum=1 # the number of wic example from the original sentence
-word_tokenize,_=lg2wordtokenize(args.lg)
+word_tokenize,_=lg2wordtokenize(args.lg, [tuple(mwe.split()) for mwe in mwes])
 tokenizer1=AutoTokenizer.from_pretrained('bert-base-multilingual-uncased')
 tokenizer2=AutoTokenizer.from_pretrained('bert-base-uncased')
 lines=[line.strip() for line in open(args.data) if len(line)>10 and len(line)<maxlen]
 lines=list(set(lines))
-
 fname=os.path.basename(args.data)+'.mirror.wic.re{0}'.format(str(args.random_er))
 
 with open(os.path.join(os.path.dirname(args.data),fname),'w') as f:
