@@ -24,7 +24,8 @@ def erase_and_mask_on_wic(example,erase_len):
 
 def wic_transform(sent,sentnum,word_tokenize,word_position_max=20, mwe_pos=None):
     sent=sent.replace('[','').replace(']','')
-    if random() < 0.15 and '<START>' in sent and '<END>' in sent:
+    mwe_pos = mwe_pos if mwe_pos is not None else 0.0
+    if random() < mwe_pos and '<START>' in sent and '<END>' in sent:
         return [word_tokenize(sent.replace('<START>', '[').replace('<END>', ']'))]
     sent = sent.replace('<START>', '').replace('<END>', '')
     w2sentsnew=defaultdict(list)
@@ -53,8 +54,8 @@ parser.add_argument('--idiom_chance', type=float, default=0.15)
 args=parser.parse_args()
 
 print(args.data)
-maxlen=150
-sentnum=1 # the number of wic example from the original sentence
+maxlen=1000
+sentnum=2 # the number of wic example from the original sentence
 word_tokenize,_=lg2wordtokenize(args.lg)
 tokenizer1=AutoTokenizer.from_pretrained('bert-base-multilingual-uncased')
 tokenizer2=AutoTokenizer.from_pretrained('bert-base-uncased')
@@ -65,7 +66,7 @@ fname=os.path.basename(args.data)+'.mirror.wic.re{0}'.format(str(args.random_er)
 with open(os.path.join(os.path.dirname(args.data),fname),'w') as f:
     for i,line in enumerate(lines):
         line=line.replace('||','//')
-        examples=wic_transform(line,sentnum,word_tokenize)
+        examples=wic_transform(line, sentnum, word_tokenize, word_position_max=100, mwe_pos=args.idiom_chance)
         for example in examples:
             example_masked=erase_and_mask_on_wic(example, args.random_er)
             f.write('||'.join([args.lg+str(i),' '.join(example),example_masked])+'\n')
