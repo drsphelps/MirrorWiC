@@ -9,7 +9,7 @@ model="bert-base-uncased"
 CUDA_VISIBLE_DEVICES=$1 python3 train.py \
 	--model_dir ${model} \
 	--train_dir "${data}"  \
-	--output_dir ../tmp/${model}_mirror_$(basename ${data})_pairwise_re${re}_infonce${infoce}_maxlen${maxlen}_bs${bs}_online_dropout${dropout}_drophead${drophead}_v3_${agg}_rs${rs}	\
+	--output_dir ../tmp/${model}_mirror	\
 	--use_cuda \
 	--epoch 2 \
 	--train_batch_size ${bs} \

@@ -329,7 +329,7 @@ def main(args):
             train_set,
             batch_size=args.train_batch_size,
             shuffle=True,
-            num_workers=1,
+            num_workers=0,
             collate_fn=collate_fn_batch_encoding_pairwise
         )
    

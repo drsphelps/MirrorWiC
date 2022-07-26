@@ -22,17 +22,11 @@ def erase_and_mask_on_wic(example,erase_len):
     example=sent_prev+' '+w+' '+sent_after
     return example
 
-def idiom_biased_sample(words, sentnum):
-    mwes_in_words = [w for w in words if w in mwes]
-    print(mwes_in_words)
-    if len(mwes_in_words) > 0:
-        if random() < 0.50:
-            words = mwes_in_words
-    
-    return sample(words, sentnum)
-
-def wic_transform(sent,sentnum,word_tokenize,word_position_max=20):
+def wic_transform(sent,sentnum,word_tokenize,word_position_max=20, mwe_pos=None):
     sent=sent.replace('[','').replace(']','')
+    if random() < 0.15 and '<START>' in sent and '<END>' in sent:
+        return [word_tokenize(sent.replace('<START>', '[').replace('<END>', ']'))]
+    sent = sent.replace('<START>', '').replace('<END>', '')
     w2sentsnew=defaultdict(list)
     wlist=word_tokenize(sent)
     for i,w in enumerate(wlist[:word_position_max]):
@@ -45,7 +39,7 @@ def wic_transform(sent,sentnum,word_tokenize,word_position_max=20):
                 w2sentsnew[w].append(sentorig)
     if sentnum>len(w2sentsnew):
         sentnum=len(w2sentsnew)
-    wlist=idiom_biased_sample(list(w2sentsnew.keys()),sentnum)
+    wlist=sample(list(w2sentsnew.keys()),sentnum)
     sentsnew=[]
     for w in wlist:
         sentsnew.append(sample(w2sentsnew[w],1)[0])
@@ -55,13 +49,13 @@ parser = argparse.ArgumentParser(description='get_mirrorwic_traindata')
 parser.add_argument('--data',type=str,help='data with one sentence per line')
 parser.add_argument('--lg',type=str,help='language')
 parser.add_argument('--random_er',type=int,help='random erasuer length')
+parser.add_argument('--idiom_chance', type=float, default=0.15)
 args=parser.parse_args()
 
-mwes = ['swan song']
 print(args.data)
 maxlen=150
 sentnum=1 # the number of wic example from the original sentence
-word_tokenize,_=lg2wordtokenize(args.lg, [tuple(mwe.split()) for mwe in mwes])
+word_tokenize,_=lg2wordtokenize(args.lg)
 tokenizer1=AutoTokenizer.from_pretrained('bert-base-multilingual-uncased')
 tokenizer2=AutoTokenizer.from_pretrained('bert-base-uncased')
 lines=[line.strip() for line in open(args.data) if len(line)>10 and len(line)<maxlen]

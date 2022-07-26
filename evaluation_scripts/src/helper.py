@@ -218,13 +218,7 @@ def get_embed(sentences,tokenizer,model,flag='cls',layer_start=None,layer_end=No
 nltk.download('punkt')
 def lg2wordtokenize(lg, mwes=None):
     if lg =='en':
-        from nltk.tokenize import word_tokenize as wt, sent_tokenize, MWETokenizer
-        mwe_tokenizer = MWETokenizer(mwes)
-        def word_tokenize(string):
-            string = string.lower()
-            words = wt(string)
-            print(mwe_tokenizer.tokenize(words))
-            return [w.replace('_', ' ') for w in mwe_tokenizer.tokenize(words)]
+        from nltk.tokenize import word_tokenize, sent_tokenize
     elif lg in ['sw','ht','kk','ml','te','tl','ko','ta','ka','ms','es','id','ar','fi','pl','fr','it','de','eu']:
         from nltk.tokenize import wordpunct_tokenize as word_tokenize
         from nltk.tokenize import sent_tokenize
