@@ -1,5 +1,5 @@
 infoce=0.04
-maxlen=50
+maxlen=150
 bs=200
 dropout=0.4
 agg='tokenmarker4layer'
